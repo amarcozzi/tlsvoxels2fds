@@ -1,0 +1,123 @@
+&HEAD CHID='test_norway_spruce_burn', TITLE='This is a test burn of a voxelized Norway Spruce at a resolution of 0.1m' /
+
+! 1 mesh 5x5x20m domain
+&MESH IJK=50,50,200, XB=-2.5,2.5,-2.5,2.5,0.0,20.0, MULT_ID='mesh' /
+
+! 8 mesh 5x5x20m domain
+! generated with mult mesh generator tool from 1 mesh dimensions
+&MULT ID="m1",DX=2.5, DY=2.5, DZ=10.0, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+&MESH IJK=25, 25, 100, XB=-2.5, 0.0, -2.5, 0.0, 0.0, 10.0, MULT_ID="m1" / 8 Mesh
+
+&TIME T_END=120. /
+
+&MISC TMPA=32. /
+
+&WIND SPEED=4.6, DIRECTION=270., L=-500., Z_0=0.03 /
+
+&REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.02, HEAT_OF_COMBUSTION=15600. /
+
+&SPEC ID='WATER VAPOR' /
+
+&SURF ID='IGNITION', HRRPUA=1500., COLOR='RED', TMP_FRONT=100., RAMP_Q='ignitor' /
+&RAMP ID='ignitor', T= 0., F=0. /
+&RAMP ID='ignitor', T= 1., F=1. /
+&RAMP ID='ignitor', T= 5., F=1. /
+&RAMP ID='ignitor', T= 6., F=0. /
+
+&VENT XB=-2.5,-2.,-2.5,-2.5,0.,0., SURF_ID='IGNITION', XYZ=0,0,0, SPREAD_RATE=1. /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&MATL ID='DIRT'
+      CONDUCTIVITY = 0.25
+      SPECIFIC_HEAT = 2.
+      DENSITY = 1300. /
+
+&SURF ID='GROUND'
+      DEFAULT=.TRUE.
+      MATL_ID='DIRT'
+      THICKNESS=0.2 /
+
+&SURF ID                        = 'wet vegetation'
+      MATL_ID                   = 'DRY GRASS'
+      MOISTURE_FRACTION         = 0.063
+      SURFACE_VOLUME_RATIO      = 9770.
+      LENGTH                    = 0.20
+      GEOMETRY                  = 'CYLINDRICAL' /
+
+&MATL ID                 = 'DRY GRASS'
+      DENSITY            = 512.
+      CONDUCTIVITY       = 0.1
+      SPECIFIC_HEAT_RAMP = 'c_v'
+      A                  = 36300.
+      E                  = 60300.
+      MATL_ID            = 'CHAR'
+      NU_MATL            = 0.2
+      SPEC_ID            = 'CELLULOSE'
+      NU_SPEC            = 0.8
+      HEAT_OF_REACTION   = 416. /
+
+&RAMP ID='c_v', T= 20., F=1.184 /
+&RAMP ID='c_v', T=800., F=4.070 /
+
+
+&SURF ID                        = 'foliage'
+      MATL_ID                   = 'vegetation'
+      MOISTURE_FRACTION         = 0.14
+      SURFACE_VOLUME_RATIO      = 3940.
+      LENGTH                    = 0.05
+      GEOMETRY                  = 'CYLINDRICAL' /
+
+ &MATL ID = 'vegetation'
+      DENSITY = 514.
+      CONDUCTIVITY = 0.11
+      SPECIFIC_HEAT_RAMP = 'cp_dry_veg'
+      A = 36300.
+      E = 60300.
+      NU_SPEC = 0.74
+      SPEC_ID = 'CELLULOSE'
+      NU_MATL = 0.26
+      MATL_ID = 'CHAR'
+      HEAT_OF_REACTION = 416. /
+
+&RAMP ID='cp_dry_veg', T= 0.,    F=1.18 /
+&RAMP ID='cp_dry_veg', T= 1000., F=4.81 /
+
+&MATL ID                 = 'CHAR'
+      DENSITY            = 300.
+      CONDUCTIVITY       = 0.052
+      SPECIFIC_HEAT_RAMP = 'cp_char'
+      N_S                = 0.
+      NU_O2_CHAR         = 1.65
+      BETA_CHAR          = 0.2
+      A                  = 430.
+      E                  = 74800.
+      SPEC_ID            = 'PRODUCTS','AIR'
+      NU_SPEC            = 8.18,-7.2
+      MATL_ID            = 'ASH'
+      NU_MATL            = 0.02
+      HEAT_OF_REACTION   = -32000. /
+
+&RAMP ID='cp_char', T=   27, F=0.715 /
+&RAMP ID='cp_char', T= 1724, F=2.04 /
+
+&MATL ID            = 'ASH'
+      DENSITY       = 67.
+      CONDUCTIVITY  = 0.1
+      SPECIFIC_HEAT = 2.0 /
+
+&PART ID='blade of grass'
+      SAMPLING_FACTOR=5
+      SURF_ID='wet vegetation'
+      PROP_ID='grass image'
+      DRAG_COEFFICIENT=2.8
+      SHAPE_FACTOR = 0.15
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS'
+      STATIC=.TRUE.
+      COLOR='BROWN' /
+
+&INIT PART_ID='blade of grass', XB=0.,100.,-50.,50.,0.00,0.21, N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., PACKING_RATIO=0.0026 /
