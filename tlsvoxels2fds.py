@@ -1,15 +1,42 @@
+"""
+Updated 11/25
+
+This script takes in an input file (on the command line or specified in the main function) consisting of a table of
+voxel XYZ coordinates as well as a column with the number of points contained in each voxel. It then writes to a file
+containing an &INIT PART line for each voxel at the specified coordinate with the proportional amount of biomass.
+
+In addition to the &INIT PART, the script also writes the &PART definition, but the assumption is that the contents of
+the output file will by copy/pasted into a full FDS file with the necessary &SURF and &MATL definitions for whatever
+foliage or thermally thin components you're dealing with.
+
+- Anthony Marcozzi
+"""
+
 import sys
 import numpy as np
 
 def calculate_total_points(input_file):
+    """
+    Calculates the total number of points in a voxel data table (for calculating density)
+    :param input_file: voxel data table with a number of points for each voxel
+    :return: the total number of points across all voxels
+    """
     voxel_array = np.genfromtxt(input_file)
     return np.sum(voxel_array[:, 3])
 
 
 def write_voxels_to_fds(filein, output, total_points):
-    res = 0.1
-    foliage_biomass = 40100
-    particle_density = 514
+    """
+    Function takes in a voxel data table with XYZ voxel location and the number of points in each voxel. The user
+    provides voxel resolution, foliage biomass, and particle density parameters within this function.
+    #TODO: Read in these parameters from some sort of
+    :param filein: data table with XYZ coordinate of center of the voxel and # of points in the voxel
+    :param output: output .txt file to write to
+    :param total_points: The total number of points across al voxels (for calculating density)
+    """
+    res = 0.05                      # resolution of the voxel (in meters)
+    foliage_biomass = 40100         # in kg
+    particle_density = 514          # density of fuel in a unit volume of fuel kg/m^3
     # total_points = calculate_total_points(filein)
 
     # Write commend to FDS file with copy/paste instructions
@@ -40,10 +67,11 @@ if __name__ == '__main__':
         input = sys.argv[1]
     else:
         # raise Exception("Please pass a voxel_metrics data table through the command line")
-        input = "norway_spruce_voxel_metrics.txt"
+        # input = "norway_spruce_voxel_metrics.txt"
+        input = "norway_spruce_voxel_metrics_005res.txt"
 
-    with open("norway_spruce_voxel_metrics.txt", "r") as filein:
+    with open(input, "r") as filein:
         total_points = calculate_total_points(filein)
-    with open("norway_spruce_voxel_metrics.txt", "r") as filein:
+    with open(input, "r") as filein:
         with open("output_tree.txt", 'w') as fileout:
             write_voxels_to_fds(filein, fileout, total_points)
